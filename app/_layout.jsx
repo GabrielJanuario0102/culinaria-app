@@ -18,11 +18,6 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 5,
   },
-  item: {
-    padding: 10,
-    fontSize: 18,
-    height: 44,
-  },
 });
 
 export default _layout;
