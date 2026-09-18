@@ -23,6 +23,16 @@ export default function TabsLayout() {
           tabBarLabelStyle: style.labelStyle,
         }}
       />
+
+      <Tabs.Screen
+        name="Ingredientes"
+        options={{
+          title: "Ingredientes",
+          animation: "fade",
+          tabBarIcon: () => null,
+          tabBarLabelStyle: style.labelStyle,
+        }}
+      />
     </Tabs>
   );
 }
