@@ -1,15 +1,26 @@
-import { NavigationContainer, StackRouter } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "./src/views/Home";
-import Listagem from "./src/views/Listagem";
+
+import _layout from "./app/_layout";
+import FormReceitaView from "./app/FormReceitaView.jsx"
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const Stack = createNativeStackNavigator();
-
   return (
-    <SafeAreaView>
-      
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Home"
+          component={_layout}
+        />
+
+        <Stack.Screen
+          name="FormReceitaView"
+          component={FormReceitaView}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

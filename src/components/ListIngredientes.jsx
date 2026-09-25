@@ -10,8 +10,12 @@ import {
 } from "react-native";
 
 import ModalEditIngrediente from "./ModalEditIngrediente";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const ListIngredientes = ({ listaIngredientes, setListaIngredientes }) => {
+const ListIngredientes = ({
+  listaIngredientes,
+  setListaIngredientes,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [itemSelecionado, setItemSelecionado] = useState(null);
 
@@ -20,12 +24,17 @@ const ListIngredientes = ({ listaIngredientes, setListaIngredientes }) => {
     setModalVisible(true);
   };
 
-  const handlePressDelete = (id) => {
+  const handlePressDelete = async (id) => {
     const listaAtualizada = listaIngredientes.filter(
       (item) => item.idMeal !== id
     );
 
     setListaIngredientes(listaAtualizada);
+
+    await AsyncStorage.setItem(
+      "ingredientes",
+      JSON.stringify(listaAtualizada)
+    );
   };
 
   const handlePressEdit = (id) => {
@@ -41,7 +50,7 @@ const ListIngredientes = ({ listaIngredientes, setListaIngredientes }) => {
     setModalVisible(true);
   };
 
-  const handleOnConfirm = (ingrediente) => {
+  const handleOnConfirm = async (ingrediente) => {
     if (itemSelecionado) {
       const index = listaIngredientes.findIndex(
         (item) => item.idMeal === itemSelecionado.idMeal
@@ -59,11 +68,31 @@ const ListIngredientes = ({ listaIngredientes, setListaIngredientes }) => {
       };
 
       setListaIngredientes(novaLista);
+
+      await AsyncStorage.setItem(
+        "ingredientes",
+        JSON.stringify(novaLista)
+      );
+
+      console.log(
+        ingrediente.strMeal + " Atualizado com sucesso."
+      );
     } else {
-      setListaIngredientes([
+      const novaLista = [
         ...listaIngredientes,
         ingrediente,
-      ]);
+      ];
+
+      setListaIngredientes(novaLista);
+
+      await AsyncStorage.setItem(
+        "ingredientes",
+        JSON.stringify(novaLista)
+      );
+
+      console.log(
+        ingrediente.strMeal + " Adicionado com sucesso."
+      );
     }
 
     setModalVisible(false);

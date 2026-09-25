@@ -1,4 +1,5 @@
 import ListIngredientes from "@/src/components/ListIngredientes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import React, { useEffect, useState } from "react";
 
@@ -9,12 +10,27 @@ const Receitas = () => {
     
     const [listaIngredientes, setListaIngredientes] = useState([]);
   
+    useEffect(() => {
+    const loadIngredientes = async () => {
+      try {
+        const data = await AsyncStorage.getItem("ingredientes");
+        const ingredientes = data != null ? JSON.parse(data): [];
+        setListaIngredientes(ingredientes);
+        console.log(listaIngredientes);
+        
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    loadIngredientes();
+  }, []);
+
     return (
     <View style={styles.container}>
       <ListIngredientes
         listaIngredientes={listaIngredientes}
         setListaIngredientes={setListaIngredientes}
-      />
+      />  
     </View>
   );
 };

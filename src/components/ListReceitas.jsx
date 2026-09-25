@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import ModalEditReceita from "./ModalEditReceita";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -20,18 +21,16 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
     setModalVisible(true);
   };
 
-  const handlePressDelete = (id) => {
-    const listaAtualizada = listaReceitas.filter(
-      (item) => item.idMeal !== id
-    );
+  const handlePressDelete = async (id) => {
+    const listaAtualizada = listaReceitas.filter((item) => item.idMeal !== id);
 
     setListaReceitas(listaAtualizada);
+
+    await AsyncStorage.setItem("receitas", JSON.stringify(listaAtualizada));
   };
 
   const handlePressEdit = (id) => {
-    const item = listaReceitas.find(
-      (item) => item.idMeal === id
-    );
+    const item = listaReceitas.find((item) => item.idMeal === id);
 
     if (!item) {
       return;
@@ -41,10 +40,10 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
     setModalVisible(true);
   };
 
-  const handleOnConfirm = (receita) => {
+  const handleOnConfirm = async (receita) => {
     if (itemSelecionado) {
       const index = listaReceitas.findIndex(
-        (item) => item.idMeal === itemSelecionado.idMeal
+        (item) => item.idMeal === itemSelecionado.idMeal,
       );
 
       if (index === -1) {
@@ -59,11 +58,18 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
       };
 
       setListaReceitas(novaLista);
+
+      await AsyncStorage.setItem("receitas", JSON.stringify(novaLista));
+
+      console.log(receita.strMeal + " Atualizado com sucesso.");
     } else {
-      setListaReceitas([
-        ...listaReceitas,
-        receita,
-      ]);
+      const novaLista = [...listaReceitas, receita];
+
+      setListaReceitas(novaLista);
+
+      await AsyncStorage.setItem("receitas", JSON.stringify(novaLista));
+
+      console.log(receita.strMeal + " Adicionado com sucesso.");
     }
 
     setModalVisible(false);
@@ -72,13 +78,8 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
 
   return (
     <>
-      <Pressable
-        style={styles.buttonAdd}
-        onPress={handlePressAdd}
-      >
-        <Text style={styles.buttonAddText}>
-          + Add Receita
-        </Text>
+      <Pressable style={styles.buttonAdd} onPress={handlePressAdd}>
+        <Text style={styles.buttonAddText}>+ Add Receita</Text>
       </Pressable>
 
       <FlatList
@@ -86,9 +87,7 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
         numColumns={2}
         columnWrapperStyle={styles.row}
         keyExtractor={(item, index) =>
-          item.idMeal
-            ? item.idMeal.toString()
-            : index.toString()
+          item.idMeal ? item.idMeal.toString() : index.toString()
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -99,31 +98,21 @@ const ListReceitas = ({ listaReceitas, setListaReceitas }) => {
               style={styles.image}
             />
 
-            <Text style={styles.title}>
-              {item.strMeal}
-            </Text>
+            <Text style={styles.title}>{item.strMeal}</Text>
 
             <View style={styles.rowButtons}>
               <Pressable
-                onPress={() =>
-                  handlePressDelete(item.idMeal)
-                }
+                onPress={() => handlePressDelete(item.idMeal)}
                 style={styles.colButtons}
               >
-                <Text style={styles.buttonDelete}>
-                  Delete
-                </Text>
+                <Text style={styles.buttonDelete}>Delete</Text>
               </Pressable>
 
               <Pressable
-                onPress={() =>
-                  handlePressEdit(item.idMeal)
-                }
+                onPress={() => handlePressEdit(item.idMeal)}
                 style={styles.colButtons}
               >
-                <Text style={styles.buttonEdit}>
-                  Edit
-                </Text>
+                <Text style={styles.buttonEdit}>Edit</Text>
               </Pressable>
             </View>
           </View>

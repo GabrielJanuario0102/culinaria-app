@@ -1,29 +1,27 @@
 import ListReceitas from "@/src/components/ListReceitas";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import React, { useEffect, useState } from "react";
 
 import { StyleSheet, View } from "react-native";
 
 const Receitas = () => {
-  const API_URL =
-    "https://www.themealdb.com/api/json/v1/1/filter.php?a=Brazil";
 
   const [listaReceitas, setListaReceitas] = useState([]);
 
   useEffect(() => {
-    fetch(API_URL)
-      .then((response) => {
-        console.log("Status:", response.status);
-        console.log("OK:", response.ok);
-
-        return response.json();
-      })
-      .then((data) => {
-        setListaReceitas(data.meals || []);
-      })
-      .catch((error) => {
-        console.log("Erro no fetch:", error);
-      });
+    const loadReceitas = async () => {
+      try {
+        const data = await AsyncStorage.getItem("receitas");
+        const receitas = data != null ? JSON.parse(data): [];
+        setListaReceitas(receitas);
+        console.log(listaReceitas);
+        
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    loadReceitas();
   }, []);
 
   return (
