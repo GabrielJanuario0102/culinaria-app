@@ -1,28 +1,30 @@
 import ListReceitas from "@/src/components/ListReceitas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { StyleSheet, View } from "react-native";
+import { useFocusEffect } from "expo-router";
 
 const Receitas = () => {
-
   const [listaReceitas, setListaReceitas] = useState([]);
 
-  useEffect(() => {
-    const loadReceitas = async () => {
-      try {
-        const data = await AsyncStorage.getItem("receitas");
-        const receitas = data != null ? JSON.parse(data): [];
-        setListaReceitas(receitas);
-        console.log(listaReceitas);
-        
-      } catch (error) {
-        console.log(error);
-      }
+  const loadReceitas = useCallback(async () => {
+    try {
+      const data = await AsyncStorage.getItem("receitas");
+      const receitas = data ? JSON.parse(data) : [];
+
+      setListaReceitas(receitas);
+    } catch (error) {
+      console.log("Erro ao carregar receitas:", error);
     }
-    loadReceitas();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadReceitas();
+    }, [loadReceitas])
+  );
 
   return (
     <View style={styles.container}>

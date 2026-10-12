@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
   Pressable,
@@ -9,105 +9,26 @@ import {
   View,
 } from "react-native";
 
-import ModalEditIngrediente from "./ModalEditIngrediente";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
-const ListIngredientes = ({
-  listaIngredientes,
-  setListaIngredientes,
-}) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [itemSelecionado, setItemSelecionado] = useState(null);
+const ListIngredientes = ({ listaIngredientes = [] }) => {
+  const navigateToDetails = (ingrediente) => {
+    router.push({
+      pathname: "/screens/FormIngredienteView",
+      params: {
+        ingredienteId: ingrediente.id,
+      },
+    });
+  };
 
   const handlePressAdd = () => {
-    setItemSelecionado(null);
-    setModalVisible(true);
-  };
-
-  const handlePressDelete = async (id) => {
-    const listaAtualizada = listaIngredientes.filter(
-      (item) => item.idMeal !== id
-    );
-
-    setListaIngredientes(listaAtualizada);
-
-    await AsyncStorage.setItem(
-      "ingredientes",
-      JSON.stringify(listaAtualizada)
-    );
-  };
-
-  const handlePressEdit = (id) => {
-    const item = listaIngredientes.find(
-      (item) => item.idMeal === id
-    );
-
-    if (!item) {
-      return;
-    }
-
-    setItemSelecionado(item);
-    setModalVisible(true);
-  };
-
-  const handleOnConfirm = async (ingrediente) => {
-    if (itemSelecionado) {
-      const index = listaIngredientes.findIndex(
-        (item) => item.idMeal === itemSelecionado.idMeal
-      );
-
-      if (index === -1) {
-        return;
-      }
-
-      const novaLista = [...listaIngredientes];
-
-      novaLista[index] = {
-        ...itemSelecionado,
-        ...ingrediente,
-      };
-
-      setListaIngredientes(novaLista);
-
-      await AsyncStorage.setItem(
-        "ingredientes",
-        JSON.stringify(novaLista)
-      );
-
-      console.log(
-        ingrediente.strMeal + " Atualizado com sucesso."
-      );
-    } else {
-      const novaLista = [
-        ...listaIngredientes,
-        ingrediente,
-      ];
-
-      setListaIngredientes(novaLista);
-
-      await AsyncStorage.setItem(
-        "ingredientes",
-        JSON.stringify(novaLista)
-      );
-
-      console.log(
-        ingrediente.strMeal + " Adicionado com sucesso."
-      );
-    }
-
-    setModalVisible(false);
-    setItemSelecionado(null);
+    router.push("/screens/CreateIngredienteView");
   };
 
   return (
-    <>
-      <Pressable
-        style={styles.buttonAdd}
-        onPress={handlePressAdd}
-      >
-        <Text style={styles.buttonAddText}>
-          + Add Ingrediente
-        </Text>
+    <View style={styles.container}>
+      <Pressable style={styles.buttonAdd} onPress={handlePressAdd}>
+        <Text style={styles.buttonAddText}>+ Adicionar Ingrediente</Text>
       </Pressable>
 
       <FlatList
@@ -115,80 +36,51 @@ const ListIngredientes = ({
         numColumns={2}
         columnWrapperStyle={styles.row}
         keyExtractor={(item, index) =>
-          item.idMeal
-            ? item.idMeal.toString()
-            : index.toString()
+          item.id ? String(item.id) : String(index)
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Image
-              source={{
-                uri: item.strMealThumb,
-              }}
-              style={styles.image}
-            />
+            <Image source={{ uri: item.imagem }} style={styles.image} />
 
-            <Text style={styles.title}>
-              {item.strMeal}
-            </Text>
+            <Text style={styles.title}>{item.nome}</Text>
 
             <View style={styles.rowButtons}>
               <Pressable
-                onPress={() =>
-                  handlePressDelete(item.idMeal)
-                }
+                onPress={() => navigateToDetails(item)}
                 style={styles.colButtons}
               >
-                <Text style={styles.buttonDelete}>
-                  Delete
-                </Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() =>
-                  handlePressEdit(item.idMeal)
-                }
-                style={styles.colButtons}
-              >
-                <Text style={styles.buttonEdit}>
-                  Edit
-                </Text>
+                <Text style={styles.buttonDetails}>Detalhes</Text>
               </Pressable>
             </View>
           </View>
         )}
       />
-
-      <ModalEditIngrediente
-        visible={modalVisible}
-        item={itemSelecionado}
-        onClose={() => {
-          setModalVisible(false);
-          setItemSelecionado(null);
-        }}
-        onConfirm={handleOnConfirm}
-      />
-    </>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+
   row: {
     justifyContent: "space-between",
-    marginBottom: 35,
+    marginBottom: 20,
   },
 
   card: {
     width: "48%",
     backgroundColor: "#fff",
-    borderRadius: 12,
     overflow: "hidden",
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#ddd",
   },
 
   image: {
     width: "100%",
     height: 150,
+    backgroundColor: "#eee",
   },
 
   title: {
@@ -204,38 +96,34 @@ const styles = StyleSheet.create({
   },
 
   colButtons: {
-    width: "40%",
+    width: "90%",
     margin: 5,
   },
 
-  buttonDelete: {
-    backgroundColor: "red",
-    color: "white",
+  buttonDetails: {
+    backgroundColor: "#333",
+    color: "#fff",
     textAlign: "center",
-    borderRadius: 5,
-    padding: 8,
-  },
-
-  buttonEdit: {
-    backgroundColor: "orange",
-    color: "white",
-    textAlign: "center",
-    borderRadius: 5,
-    padding: 8,
+    padding: 9,
   },
 
   buttonAdd: {
-    backgroundColor: "green",
+    backgroundColor: "#198754",
     padding: 12,
-    borderRadius: 8,
     marginBottom: 15,
   },
 
   buttonAddText: {
-    color: "white",
+    color: "#fff",
     textAlign: "center",
     fontSize: 16,
     fontWeight: "600",
+  },
+
+  empty: {
+    textAlign: "center",
+    padding: 20,
+    color: "#666",
   },
 });
 
